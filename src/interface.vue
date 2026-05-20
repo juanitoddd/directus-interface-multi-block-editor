@@ -1,30 +1,36 @@
 <template>
-	<div class="editor sans-serif bordered">
-		<div>Here there is something</div>
+	<div :id="editorId" class="multiple-editor sans-serif bordered">		
 		<div :class="divLayoutClass">
-			<div><EditorComponent /></div>
-			<div><EditorComponent /></div>
+			<div><EditorComponent @input="(output) => handleEditorInput(1, output)" /></div>
+			<div><EditorComponent @input="(output) => handleEditorInput(2, output)	" /></div>
 		</div>
 		<div>Current cols: {{ gridCols }}</div>
 		<div class="p-2">
 			<input v-model="gridCols"/>
 		</div>
-		<div class="p-2">
-			<input :value="value" />
-		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
-import { defineComponent, computed, ref } from 'vue';
-import EditorJS from '@editorjs/editorjs';
+import { computed, ref, watch } from 'vue';
+import { v4 as uuidv4 } from 'uuid';
 import EditorComponent from './editor/editor.vue'
 
 const gridCols = ref(1)
 
-const divLayoutClass = computed(() => {	
-	return `grid grid-cols-${gridCols.value}`
-})
+const editorId = uuidv4();
+
+const divLayoutClass = computed(() => `root grid grid-cols-${gridCols.value}`)
+
+watch(gridCols, async (current: number, _previous: number) => {
+	console.log("current cols ~~~>", current);
+	const otherPossibleEditors = document.querySelectorAll('.multiple-editor .root');
+	console.log("otherPossibleEditors:", otherPossibleEditors);
+});
+
+const handleEditorInput = (id: number, editorInput: EditorJS.OutputData | null) => {
+  console.log(`Editor ${id} received new message:`, editorInput);
+}
 
 </script>
 <style lang="scss" scoped>
