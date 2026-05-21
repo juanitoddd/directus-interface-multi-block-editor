@@ -1,13 +1,9 @@
 <template>
 	<div :id="editorId" class="multiple-editor sans-serif bordered">		
-		<div :class="divLayoutClass">
+		<div class="grid grid-cols-2">
 			<div><EditorComponent @input="(output) => handleEditorInput(1, output)" /></div>
 			<div><EditorComponent @input="(output) => handleEditorInput(2, output)	" /></div>
-		</div>
-		<div>Current cols: {{ gridCols }}</div>
-		<div class="p-2">
-			<input v-model="gridCols"/>
-		</div>
+		</div>				
 	</div>
 </template>
 
