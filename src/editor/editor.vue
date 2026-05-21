@@ -78,6 +78,9 @@ bus.on(async (event) => {
 });
 
 onMounted(async () => {
+
+	console.log("Editor props value", props)
+
 	editorjsRef.value = new EditorJS({
 		logLevel: 'ERROR' as EditorJS.LogLevels,
 		holder: editorElement.value,
@@ -88,7 +91,7 @@ onMounted(async () => {
 		tools,
 	});
 
-	await editorjsRef.value.isReady;
+	await editorjsRef.value.isReady;	
 
 	const sanitizedValue = sanitizeValue(props.value);
 
@@ -114,7 +117,7 @@ onUnmounted(() => {
 
 watch(
 	() => props.value,
-	async (newVal, oldVal) => {
+	async (newVal, oldVal) => {		
 		// First value will be set in 'onMounted'
 		if (!editorjsRef.value || !editorjsIsReady.value)
 			return;

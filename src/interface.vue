@@ -1,31 +1,64 @@
 <template>
 	<div :id="editorId" class="multiple-editor sans-serif bordered">		
 		<div class="grid grid-cols-2">
-			<div><EditorComponent @input="(output) => handleEditorInput(1, output)" /></div>
-			<div><EditorComponent @input="(output) => handleEditorInput(2, output)	" /></div>
+			<div><EditorComponent :value="left" @input="(output) => handleEditorInput('left', output)" /></div>
+			<div><EditorComponent :value="right" @input="(output) => handleEditorInput('right', output)" /></div>
 		</div>				
 	</div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watch, onMounted } from 'vue';
 import { v4 as uuidv4 } from 'uuid';
+import { cloneDeep, isEqual } from 'lodash';
 import EditorComponent from './editor/editor.vue'
 
-const gridCols = ref(1)
+const props = withDefaults(
+	defineProps<{		
+		value?: Record<string, any> | null;				
+		tools?: string[];
+		folder?: string;		
+	}>(),
+	{
+		value: null,		
+		tools: () => ['header', 'nestedlist', 'code', 'image', 'paragraph', 'checklist', 'quote', 'underline'],		
+	},
+);
 
+const emit = defineEmits<{ input: Record<string, EditorJS.OutputData | null> }>();
+const content = ref({left:null, right:null})
+const left = ref(null)
+const right = ref(null)
 const editorId = uuidv4();
 
-const divLayoutClass = computed(() => `root grid grid-cols-${gridCols.value}`)
-
+watch(
+	() => props.value,
+	async (newVal, oldVal) => {
+		console.log("newVal", newVal)
+		if(!newVal) return; 
+		const cont = typeof newVal === 'string' ? JSON.parse(newVal) : newVal
+		left.value = cloneDeep(cont.left);
+		right.value = cloneDeep(cont.right);
+		console.log("right", right)
+		console.log("left", left)
+	}
+)
+/*
+const gridCols = ref(1)
 watch(gridCols, async (current: number, _previous: number) => {
 	console.log("current cols ~~~>", current);
 	const otherPossibleEditors = document.querySelectorAll('.multiple-editor .root');
-	console.log("otherPossibleEditors:", otherPossibleEditors);
+	console.log("otherPossibleEditors:", otherPossibleEditors);	
 });
+*/
 
-const handleEditorInput = (id: number, editorInput: EditorJS.OutputData | null) => {
-  console.log(`Editor ${id} received new message:`, editorInput);
+const handleEditorInput = (position: string, editorInput: EditorJS.OutputData | null) => {
+  console.log(`Editor ${position} received new message:`, editorInput);
+  if(editorInput) {
+	  content.value[position] = editorInput;
+	  console.log("content.value ~~>", content.value);
+	  emit('input', content.value);
+  }
 }
 
 </script>
