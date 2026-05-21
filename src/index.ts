@@ -8,5 +8,5 @@ export default defineInterface({
 	description: 'Multiple block editor to allow grid-like simultaneous editors',
 	component: InterfaceComponent,
 	options: null,
-	types: ['json'],
+	types: ['json']
 });

@@ -8,14 +8,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch, onMounted } from 'vue';
+import { ref, watch } from 'vue';
 import { v4 as uuidv4 } from 'uuid';
-import { cloneDeep, isEqual } from 'lodash';
+import { cloneDeep } from 'lodash';
 import EditorComponent from './editor/editor.vue'
+
+type Side = 'left' | 'right'
 
 const props = withDefaults(
 	defineProps<{		
-		value?: Record<string, any> | null;				
+		value?: Record<Side, any> | null;				
 		tools?: string[];
 		folder?: string;		
 	}>(),
@@ -25,38 +27,28 @@ const props = withDefaults(
 	},
 );
 
-const emit = defineEmits<{ input: Record<string, EditorJS.OutputData | null> }>();
-const content = ref({left:null, right:null})
+const emit = defineEmits<{ input: Record<Side, EditorJS.OutputData | null> }>();
+const content = ref<Record<Side, EditorJS.OutputData | null>>({left:null, right:null})
 const left = ref(null)
 const right = ref(null)
 const editorId = uuidv4();
 
 watch(
 	() => props.value,
-	async (newVal, oldVal) => {
-		console.log("newVal", newVal)
-		if(!newVal) return; 
+	async (newVal, _oldVal) => {
+		if(!newVal) return;
 		const cont = typeof newVal === 'string' ? JSON.parse(newVal) : newVal
 		left.value = cloneDeep(cont.left);
 		right.value = cloneDeep(cont.right);
-		console.log("right", right)
-		console.log("left", left)
+		content.value.left = cloneDeep(cont.left);
+		content.value.right = cloneDeep(cont.right);		
 	}
 )
-/*
-const gridCols = ref(1)
-watch(gridCols, async (current: number, _previous: number) => {
-	console.log("current cols ~~~>", current);
-	const otherPossibleEditors = document.querySelectorAll('.multiple-editor .root');
-	console.log("otherPossibleEditors:", otherPossibleEditors);	
-});
-*/
 
-const handleEditorInput = (position: string, editorInput: EditorJS.OutputData | null) => {
+const handleEditorInput = (position: Side, editorInput: EditorJS.OutputData) => {
   console.log(`Editor ${position} received new message:`, editorInput);
   if(editorInput) {
 	  content.value[position] = editorInput;
-	  console.log("content.value ~~>", content.value);
 	  emit('input', content.value);
   }
 }
